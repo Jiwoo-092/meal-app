@@ -25,7 +25,7 @@ const POSE = {
 } satisfies Record<string, Pose>;
 
 /** 맨 뒤로 들어가는 모션 길이 (home.css @keyframes card-tuck 과 맞출 것) */
-const TUCK_MS = 760;
+const TUCK_MS = 680;
 const SWIPE_DISTANCE = 60; // px
 const SWIPE_VELOCITY = 0.45; // px/ms
 const TAP_SLOP = 6; // px
@@ -59,22 +59,32 @@ export default function PolaroidStack({ items, onChange }: Props) {
   const canSwipe = order.length > 1;
 
   // 맨 뒤로 들어가는 중인 카드 (fx/fr: 손을 뗀 순간의 위치·각도)
-  const [tuck, setTuck] = useState<{ id: string; fx: number; fr: number } | null>(null);
+  const [tuck, setTuck] = useState<{ id: string; fx: number; fr: number; behind: boolean } | null>(null);
   const tuckTimer = useRef<number | undefined>(undefined);
+  const behindTimer = useRef<number | undefined>(undefined);
 
   const advance = useCallback(
     (fromDx = 0) => {
       if (!canSwipe) return;
       const [first, ...rest] = order;
       setOrder([...rest, first]);
-      setTuck({ id: first, fx: fromDx, fr: fromDx * 0.05 });
+      setTuck({ id: first, fx: fromDx, fr: fromDx * 0.05, behind: false });
       window.clearTimeout(tuckTimer.current);
+      window.clearTimeout(behindTimer.current);
+      // 뒤로 들어가는 순간(애니메이션 절반)부터 뒤 카드 톤으로 바뀌어, 착지 후 색이 다시 변하지 않게
+      behindTimer.current = window.setTimeout(() => setTuck((t) => (t ? { ...t, behind: true } : t)), TUCK_MS * 0.45);
       tuckTimer.current = window.setTimeout(() => setTuck(null), TUCK_MS + 40);
     },
     [canSwipe, order],
   );
 
-  useEffect(() => () => window.clearTimeout(tuckTimer.current), []);
+  useEffect(
+    () => () => {
+      window.clearTimeout(tuckTimer.current);
+      window.clearTimeout(behindTimer.current);
+    },
+    [],
+  );
 
   const poseFor = (id: string): Pose & { hidden?: boolean } => {
     const k = order.indexOf(id);
@@ -172,7 +182,7 @@ export default function PolaroidStack({ items, onChange }: Props) {
                 }
               : {})}
           >
-            <Polaroid polaroid={p} tone={tuck?.id === p.id ? 'front' : pose.tone} />
+            <Polaroid polaroid={p} tone={tuck?.id === p.id && !tuck.behind ? 'front' : pose.tone} />
           </div>
         );
       })}

@@ -185,7 +185,7 @@
 }
 
 .pstack__card.is-tucking {
-  animation: card-tuck 0.76s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: card-tuck 0.68s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
 /* 앞 카드 → 왼쪽으로 빠져나감 → 스택 맨 뒤 자리로 들어감 */
@@ -259,7 +259,7 @@
   inset: 0;
   border: 1px solid var(--gray-200);
   border-radius: 8px;
-  transition: background-color 0.5s ease;
+  transition: background-color 0.35s ease;
 }
 
 .pcard--front .pcard__frame {
