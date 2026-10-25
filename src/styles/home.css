@@ -185,26 +185,8 @@
 }
 
 .pstack__card.is-tucking {
-  animation: card-tuck 0.68s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-/* 앞 카드 → 왼쪽으로 빠져나감 → 스택 맨 뒤 자리로 들어감 */
-@keyframes card-tuck {
-  0% {
-    transform: translate(var(--fx, 0px), 0) rotate(var(--fr, 0deg)) scale(1);
-    z-index: 40;
-  }
-  42% {
-    transform: translate(-240px, 14px) rotate(-16deg) scale(0.96);
-    z-index: 40;
-  }
-  50% {
-    z-index: 1;
-  }
-  100% {
-    transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(var(--s));
-    z-index: 1;
-  }
+  /* 모션은 PolaroidStack.tsx (Web Animations) — 그동안 CSS 전환은 끔 */
+  transition: opacity 0.4s ease;
 }
 
 /* ---------- 인디케이터 ---------- */
@@ -368,7 +350,5 @@
   .pstack__card {
     transition-duration: 0.01s;
   }
-  .pstack__card.is-tucking {
-    animation-duration: 0.01s;
-  }
+
 }

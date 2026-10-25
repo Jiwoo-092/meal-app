@@ -24,8 +24,37 @@ const POSE = {
   back2: { x: 0, y: 19, r: -27, s: 0.903, tone: 'far', z: 10 },
 } satisfies Record<string, Pose>;
 
-/** 맨 뒤로 들어가는 모션 길이 (home.css @keyframes card-tuck 과 맞출 것) */
-const TUCK_MS = 680;
+/** 맨 뒤로 들어가는 모션 */
+const TUCK_MS = 720;
+const TUCK_SWING = 230; // 왼쪽으로 빠지는 거리(px, 디자인 기준)
+/** 전체 진행 곡선: 처음엔 빠르게 빠지고, 뒤로 들어가며 부드럽게 감속 (중간에 멈추는 구간 없음) */
+const tuckEase = (t: number) => 1 - Math.pow(1 - t, 1.8);
+/** 카드가 가장 왼쪽(뒤로 넘어가는 지점)에 도달하는 시간 비율 */
+const TUCK_TURN = 1 - Math.pow(0.5, 1 / 1.8);
+
+/**
+ * 앞 카드 → 왼쪽으로 크게 호를 그리며 → 스택 맨 뒤 자리.
+ * 구간마다 멈췄다 출발하지 않도록 하나의 연속 곡선을 샘플링해 키프레임으로 만든다.
+ */
+function tuckKeyframes(fx: number, fr: number, to: Pose): Keyframe[] {
+  const N = 24;
+  const frames: Keyframe[] = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N;
+    const p = tuckEase(t);
+    const arc = Math.sin(Math.PI * p);
+    const x = fx + (to.x - fx) * p - TUCK_SWING * arc;
+    const y = to.y * p + 6 * arc;
+    const r = fr + (to.r - fr) * p;
+    const s = 1 + (to.s - 1) * p - 0.03 * arc;
+    frames.push({
+      offset: t,
+      transform: `translate(${x.toFixed(2)}px, ${y.toFixed(2)}px) rotate(${r.toFixed(2)}deg) scale(${s.toFixed(4)})`,
+      zIndex: p < 0.5 ? 40 : 1,
+    });
+  }
+  return frames;
+}
 const SWIPE_DISTANCE = 60; // px
 const SWIPE_VELOCITY = 0.45; // px/ms
 const TAP_SLOP = 6; // px
@@ -62,17 +91,24 @@ export default function PolaroidStack({ items, onChange }: Props) {
   const [tuck, setTuck] = useState<{ id: string; fx: number; fr: number; behind: boolean } | null>(null);
   const tuckTimer = useRef<number | undefined>(undefined);
   const behindTimer = useRef<number | undefined>(undefined);
+  const cardEls = useRef(new Map<string, HTMLDivElement>());
 
   const advance = useCallback(
     (fromDx = 0) => {
       if (!canSwipe) return;
       const [first, ...rest] = order;
-      setOrder([...rest, first]);
+      const next = [...rest, first];
+      const to = next.length >= 3 ? POSE.back2 : POSE.back1;
+      setOrder(next);
       setTuck({ id: first, fx: fromDx, fr: fromDx * 0.05, behind: false });
+      cardEls.current.get(first)?.animate(tuckKeyframes(fromDx, fromDx * 0.05, to), {
+        duration: TUCK_MS,
+        easing: 'linear',
+      });
       window.clearTimeout(tuckTimer.current);
       window.clearTimeout(behindTimer.current);
-      // 뒤로 들어가는 순간(애니메이션 절반)부터 뒤 카드 톤으로 바뀌어, 착지 후 색이 다시 변하지 않게
-      behindTimer.current = window.setTimeout(() => setTuck((t) => (t ? { ...t, behind: true } : t)), TUCK_MS * 0.45);
+      // 뒤로 넘어가는 순간부터 뒤 카드 톤으로 바뀌어, 착지 후 색이 다시 변하지 않게
+      behindTimer.current = window.setTimeout(() => setTuck((t) => (t ? { ...t, behind: true } : t)), TUCK_MS * TUCK_TURN);
       tuckTimer.current = window.setTimeout(() => setTuck(null), TUCK_MS + 40);
     },
     [canSwipe, order],
@@ -161,11 +197,14 @@ export default function PolaroidStack({ items, onChange }: Props) {
           '--s': pose.s,
           zIndex: pose.z,
           opacity: pose.hidden ? 0 : 1,
-          ...(tuck?.id === p.id ? { '--fx': `${tuck.fx}px`, '--fr': `${tuck.fr}deg` } : null),
         } as CSSProperties;
         return (
           <div
             key={p.id}
+            ref={(el) => {
+              if (el) cardEls.current.set(p.id, el);
+              else cardEls.current.delete(p.id);
+            }}
             className={`pstack__card${dragging ? ' is-dragging' : ''}${tuck?.id === p.id ? ' is-tucking' : ''}`}
             style={style}
             aria-hidden={!isFront}
