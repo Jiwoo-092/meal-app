@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { goBack } from '../lib/router';
-import { IconBack } from './Icons';
+import Icon from './Icon';
 
 interface Props {
   title: string;
@@ -16,7 +16,7 @@ export default function TopBar({ title, back = false, backFallback = '/home', ri
       <div className="top-bar__slot">
         {back && (
           <button type="button" className="icon-btn" onClick={() => goBack(backFallback)} aria-label="뒤로 가기">
-            <IconBack />
+            <Icon name="arrow_left_light" size={28} />
           </button>
         )}
       </div>

@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type CSSProperties, type KeyboardEvent, type PointerEvent } from 'react';
 import type { Polaroid as PolaroidData } from '../data/mock';
 import { formatStamp } from '../data/utils';
+import { useArtboardScale } from '../lib/artboard';
 import { navigate } from '../lib/router';
 import Polaroid, { type PolaroidTone } from './Polaroid';
 
@@ -23,8 +24,8 @@ const POSE = {
   back2: { x: 0, y: 19, r: -27, s: 0.903, tone: 'far', z: 10 },
 } satisfies Record<string, Pose>;
 
-const CARD_H = 345;
-const PILE_R = -14;
+/** 지나간 카드 자리 — Figma home-swipe: 카드 중심 (204.2, 852.5) = 앞 카드 중심 + (16.7, 453) */
+const PILE = { x: 17, y: 453, r: -14, s: 0.903, tone: 'far', z: 5 } satisfies Pose;
 const SWIPE_DISTANCE = 60; // px
 const SWIPE_VELOCITY = 0.45; // px/ms
 const TAP_SLOP = 6; // px
@@ -33,17 +34,14 @@ interface Props {
   items: PolaroidData[];
   /** 앞 카드가 바뀔 때 (제목·인디케이터 갱신용) */
   onChange?: (index: number) => void;
-  /** 지나간 카드가 생겼는지 (하단 블러 표시용) */
-  onPileChange?: (hasPile: boolean) => void;
 }
 
-export default function PolaroidStack({ items, onChange, onPileChange }: Props) {
+export default function PolaroidStack({ items, onChange }: Props) {
   const ids = items.map((p) => p.id);
   const [order, setOrder] = useState<string[]>(ids);
   const [pileId, setPileId] = useState<string | null>(null);
   const [drag, setDrag] = useState<{ dx: number; active: boolean }>({ dx: 0, active: false });
-  const [pileY, setPileY] = useState(500);
-  const stageRef = useRef<HTMLDivElement>(null);
+  const scale = useArtboardScale();
   const gesture = useRef<{ x: number; y: number; t: number; id: number; moved: boolean; axis: 'x' | 'y' | null } | null>(null);
 
   // 데이터가 바뀌면(다른 날짜 등) 스택 초기화
@@ -59,23 +57,6 @@ export default function PolaroidStack({ items, onChange, onPileChange }: Props) 
     onChange?.(Math.max(0, i));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [order[0]]);
-
-  useEffect(() => {
-    onPileChange?.(pileId !== null);
-  }, [pileId, onPileChange]);
-
-  // 지나간 카드 자리: 화면 하단에서 카드 중심이 40px 아래 (Figma: 812 프레임에서 중심 y=852)
-  useLayoutEffect(() => {
-    const measure = () => {
-      const el = stageRef.current;
-      if (!el) return;
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      setPileY(window.innerHeight + 40 - top - CARD_H / 2);
-    };
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
 
   const canSwipe = order.length > 1;
 
@@ -100,7 +81,7 @@ export default function PolaroidStack({ items, onChange, onPileChange }: Props) 
     const k = order.indexOf(id);
     if (k === 0) return POSE.front;
     if (k === 1) return POSE.back1;
-    if (id === pileId) return { x: 17, y: pileY, r: PILE_R, s: 0.903, tone: 'far', z: 5 };
+    if (id === pileId) return PILE;
     if (k === 2) return POSE.back2;
     return { ...POSE.back2, z: 1, hidden: true };
   };
@@ -114,8 +95,9 @@ export default function PolaroidStack({ items, onChange, onPileChange }: Props) 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
     const g = gesture.current;
     if (!g || g.id !== e.pointerId) return;
-    const dx = e.clientX - g.x;
-    const dy = e.clientY - g.y;
+    // 화면 px → 디자인 px
+    const dx = (e.clientX - g.x) / scale;
+    const dy = (e.clientY - g.y) / scale;
     if (!g.axis && Math.hypot(dx, dy) > TAP_SLOP) {
       g.axis = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
       g.moved = true;
@@ -131,7 +113,7 @@ export default function PolaroidStack({ items, onChange, onPileChange }: Props) 
     const g = gesture.current;
     gesture.current = null;
     if (!g || g.id !== e.pointerId) return;
-    const dx = e.clientX - g.x;
+    const dx = (e.clientX - g.x) / scale;
     const dt = Math.max(1, performance.now() - g.t);
     const v = dx / dt;
 
@@ -158,7 +140,7 @@ export default function PolaroidStack({ items, onChange, onPileChange }: Props) 
   const front = items.find((p) => p.id === order[0]);
 
   return (
-    <div className="pstack" ref={stageRef}>
+    <div className="pstack">
       {items.map((p) => {
         const pose = poseFor(p.id);
         const isFront = p.id === order[0];
