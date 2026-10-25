@@ -8,8 +8,8 @@ import Polaroid, { type PolaroidTone } from './Polaroid';
 /**
  * 홈 폴라로이드 스택 — Figma home / home-swipe 1~3
  *
- * - 앞 카드를 왼쪽으로 스와이프하면 카드가 화면 아래(지나간 카드 자리)로 내려가고
- *   뒤에 기울어져 있던 다음 카드가 똑바로 서며 앞으로 나온다. 끝까지 가면 처음으로 순환.
+ * - 앞 카드를 왼쪽으로 스와이프하면 카드가 왼쪽으로 빠져나갔다가 스택 맨 뒤로 들어가고,
+ *   뒤에 기울어져 있던 다음 카드가 똑바로 서며 앞으로 나온다. (무한 순환)
  * - 앞 카드를 탭하면 상세페이지로 이동.
  *
  * 좌표는 Figma 375×812 프레임에서 앞 카드(238×345) 중심 기준으로 측정한 값
@@ -24,8 +24,8 @@ const POSE = {
   back2: { x: 0, y: 19, r: -27, s: 0.903, tone: 'far', z: 10 },
 } satisfies Record<string, Pose>;
 
-/** 지나간 카드 자리 — Figma home-swipe: 카드 중심 (204.2, 852.5) = 앞 카드 중심 + (16.7, 453) */
-const PILE = { x: 17, y: 453, r: -14, s: 0.903, tone: 'far', z: 5 } satisfies Pose;
+/** 맨 뒤로 들어가는 모션 길이 (home.css @keyframes card-tuck 과 맞출 것) */
+const TUCK_MS = 760;
 const SWIPE_DISTANCE = 60; // px
 const SWIPE_VELOCITY = 0.45; // px/ms
 const TAP_SLOP = 6; // px
@@ -39,7 +39,6 @@ interface Props {
 export default function PolaroidStack({ items, onChange }: Props) {
   const ids = items.map((p) => p.id);
   const [order, setOrder] = useState<string[]>(ids);
-  const [pileId, setPileId] = useState<string | null>(null);
   const [drag, setDrag] = useState<{ dx: number; active: boolean }>({ dx: 0, active: false });
   const scale = useArtboardScale();
   const gesture = useRef<{ x: number; y: number; t: number; id: number; moved: boolean; axis: 'x' | 'y' | null } | null>(null);
@@ -48,7 +47,6 @@ export default function PolaroidStack({ items, onChange }: Props) {
   const key = ids.join(',');
   useEffect(() => {
     setOrder(ids);
-    setPileId(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
@@ -60,28 +58,28 @@ export default function PolaroidStack({ items, onChange }: Props) {
 
   const canSwipe = order.length > 1;
 
-  const [leavingId, setLeavingId] = useState<string | null>(null);
-  const leaveTimer = useRef<number | undefined>(undefined);
+  // 맨 뒤로 들어가는 중인 카드 (fx/fr: 손을 뗀 순간의 위치·각도)
+  const [tuck, setTuck] = useState<{ id: string; fx: number; fr: number } | null>(null);
+  const tuckTimer = useRef<number | undefined>(undefined);
 
-  const advance = useCallback(() => {
-    if (!canSwipe) return;
-    const [first, ...rest] = order;
-    const next = [...rest, first];
-    setOrder(next);
-    setPileId(next.length >= 3 ? first : null);
-    // 내려가는 동안은 새 앞 카드보다 위에 보이도록
-    setLeavingId(first);
-    window.clearTimeout(leaveTimer.current);
-    leaveTimer.current = window.setTimeout(() => setLeavingId(null), 420);
-  }, [canSwipe, order]);
+  const advance = useCallback(
+    (fromDx = 0) => {
+      if (!canSwipe) return;
+      const [first, ...rest] = order;
+      setOrder([...rest, first]);
+      setTuck({ id: first, fx: fromDx, fr: fromDx * 0.05 });
+      window.clearTimeout(tuckTimer.current);
+      tuckTimer.current = window.setTimeout(() => setTuck(null), TUCK_MS + 40);
+    },
+    [canSwipe, order],
+  );
 
-  useEffect(() => () => window.clearTimeout(leaveTimer.current), []);
+  useEffect(() => () => window.clearTimeout(tuckTimer.current), []);
 
   const poseFor = (id: string): Pose & { hidden?: boolean } => {
     const k = order.indexOf(id);
     if (k === 0) return POSE.front;
     if (k === 1) return POSE.back1;
-    if (id === pileId) return PILE;
     if (k === 2) return POSE.back2;
     return { ...POSE.back2, z: 1, hidden: true };
   };
@@ -124,7 +122,7 @@ export default function PolaroidStack({ items, onChange }: Props) {
     }
     const commit = !cancelled && g.axis === 'x' && canSwipe && (dx < -SWIPE_DISTANCE || (v < -SWIPE_VELOCITY && dx < -15));
     setDrag({ dx: 0, active: false });
-    if (commit) advance();
+    if (commit) advance(dx);
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -151,13 +149,14 @@ export default function PolaroidStack({ items, onChange }: Props) {
           '--y': `${pose.y}px`,
           '--r': `${pose.r + dx * 0.05}deg`,
           '--s': pose.s,
-          zIndex: p.id === leavingId ? 40 : pose.z,
+          zIndex: pose.z,
           opacity: pose.hidden ? 0 : 1,
+          ...(tuck?.id === p.id ? { '--fx': `${tuck.fx}px`, '--fr': `${tuck.fr}deg` } : null),
         } as CSSProperties;
         return (
           <div
             key={p.id}
-            className={`pstack__card${dragging ? ' is-dragging' : ''}${p.id === pileId ? ' is-pile' : ''}`}
+            className={`pstack__card${dragging ? ' is-dragging' : ''}${tuck?.id === p.id ? ' is-tucking' : ''}`}
             style={style}
             aria-hidden={!isFront}
             {...(isFront
@@ -173,12 +172,10 @@ export default function PolaroidStack({ items, onChange }: Props) {
                 }
               : {})}
           >
-            <Polaroid polaroid={p} tone={pose.tone} />
+            <Polaroid polaroid={p} tone={tuck?.id === p.id ? 'front' : pose.tone} />
           </div>
         );
       })}
-      {/* 하단 블러: 뒤 카드·지나간 카드 위, 앞 카드 아래 */}
-      <div className={`home__veil${pileId ? ' is-on' : ''}`} aria-hidden="true" />
       {front && <span className="sr-only" aria-live="polite">{`${formatStamp(front.date, front.time)} ${front.title}`}</span>}
     </div>
   );

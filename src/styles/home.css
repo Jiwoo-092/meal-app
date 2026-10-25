@@ -184,10 +184,27 @@
   cursor: grabbing;
 }
 
-.pstack__card.is-pile {
-  transition:
-    transform 0.72s cubic-bezier(0.32, 0.72, 0.24, 1),
-    opacity 0.4s ease;
+.pstack__card.is-tucking {
+  animation: card-tuck 0.76s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+/* 앞 카드 → 왼쪽으로 빠져나감 → 스택 맨 뒤 자리로 들어감 */
+@keyframes card-tuck {
+  0% {
+    transform: translate(var(--fx, 0px), 0) rotate(var(--fr, 0deg)) scale(1);
+    z-index: 40;
+  }
+  42% {
+    transform: translate(-240px, 14px) rotate(-16deg) scale(0.96);
+    z-index: 40;
+  }
+  50% {
+    z-index: 1;
+  }
+  100% {
+    transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(var(--s));
+    z-index: 1;
+  }
 }
 
 /* ---------- 인디케이터 ---------- */
@@ -229,27 +246,6 @@
   text-align: center;
   color: var(--gray-500);
 }
-
-/* ---------- 하단 블러 (지나간 카드 위) ---------- */
-.home__veil {
-  position: absolute;
-  left: -200px; /* 아트보드 좌우 여백까지 덮도록 */
-  right: -200px;
-  top: -21px; /* 812 - 606 = 206 → .pstack(top 227) 기준 */
-  height: 606px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(218, 218, 218, 0.54) 87.98%);
-  -webkit-backdrop-filter: blur(1.45px);
-  backdrop-filter: blur(1.45px);
-  pointer-events: none;
-  z-index: 25; /* 뒤 카드 위, 앞 카드 아래 */
-  opacity: 0;
-  transition: opacity 0.6s ease;
-}
-
-.home__veil.is-on {
-  opacity: 1;
-}
-
 
 /* ---------- 폴라로이드 카드 ---------- */
 .pcard {
@@ -369,8 +365,10 @@
   .home__title {
     animation: none;
   }
-  .pstack__card,
-  .pstack__card.is-pile {
+  .pstack__card {
     transition-duration: 0.01s;
+  }
+  .pstack__card.is-tucking {
+    animation-duration: 0.01s;
   }
 }
