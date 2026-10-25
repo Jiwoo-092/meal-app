@@ -1,0 +1,71 @@
+/*
+ * 디자인 토큰 — Figma 'Mealo-APP' 변수 기준
+ */
+:root {
+  /* mealo / main */
+  --mealo-red-orange: #ff5931;
+  --mealo-fire-brick: #f23816;
+  --mealo-peach-orange: #ffb658;
+  --mealo-coral: #ff9b6d;
+  /* mealo / sub */
+  --mealo-strawberry: #fd595a;
+  --mealo-lemon: #fdff82;
+  --mealo-mint: #a8f1bf;
+  --mealo-skyblue: #b0c4ff;
+
+  /* gray */
+  --gray-100: #f8f8f9;
+  --gray-200: #ebecef;
+  --gray-300: #dee0e6;
+  --gray-400: #c0c3c9;
+  --gray-500: #9b9ca1;
+  --gray-600: #5f5f67;
+  --gray-700: #3a3c40;
+  --gray-800: #2b2c2e;
+  --white: #ffffff;
+  --black: #100d08;
+  --line-icon: #33363f;
+
+  /* effect */
+  --shadow-float: 0 1px 11.1px rgba(0, 0, 0, 0.19);
+  --shadow-polaroid: 0 1px 0.2px rgba(0, 0, 0, 0.3);
+
+  /* typography */
+  --font-suit: 'SUIT Variable', 'SUIT', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+  --font-head: 'BC Alphapipe TEST', 'Poppins', var(--font-suit);
+  --font-num: 'Poppins', var(--font-suit);
+
+  /* ---- 이전 와이어프레임 호환 (화면 리빌드 후 정리 예정) ---- */
+  --color-bg: var(--white);
+  --color-surface: var(--white);
+  --color-text: var(--gray-800);
+  --color-text-sub: var(--gray-500);
+  --color-border: var(--gray-200);
+  --color-primary: var(--gray-800);
+  --color-on-primary: var(--white);
+  --color-accent: var(--mealo-red-orange);
+  --color-muted: var(--gray-100);
+  --font-family: var(--font-suit);
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 22px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.08);
+
+  /* layout */
+  --app-max-width: 480px;
+  --top-bar-height: 54px;
+  --tab-bar-space: 110px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
