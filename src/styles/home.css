@@ -282,6 +282,15 @@
   aspect-ratio: 238 / 345;
 }
 
+/* 사진·스티커는 238:345 영역 안에 배치 — 카드가 더 길어져도(상세 278×420) 아래 여백만 늘어난다 */
+.pcard__body {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  aspect-ratio: 238 / 345;
+}
+
 .pcard__frame {
   position: absolute;
   inset: 0;

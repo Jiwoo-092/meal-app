@@ -29,6 +29,7 @@ export default function Polaroid({ polaroid, tone = 'front', className = '', sty
   return (
     <div className={`pcard pcard--${tone} ${className}`} style={style}>
       <div className="pcard__frame" aria-hidden="true" />
+      <div className="pcard__body">
       <div className="pcard__photo">
         <img src={design.photo} alt={design.photoAlt} draggable={false} />
       </div>
@@ -52,6 +53,7 @@ export default function Polaroid({ polaroid, tone = 'front', className = '', sty
             />
           );
         })}
+      </div>
     </div>
   );
 }

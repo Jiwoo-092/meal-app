@@ -18,7 +18,7 @@ export default function PolaroidDetailPage({ id }: { id: string }) {
   if (!polaroid) return <NotFoundPage message="폴라로이드를 찾을 수 없어요." />;
 
   return (
-    <ScrollArtboard height={1111} className="detail" overlay={<TabBar inArtboard />}>
+    <ScrollArtboard height={1058} className="detail" overlay={<TabBar inArtboard />}>
       <header className="sub-header">
         <button type="button" className="sub-header__btn" aria-label="뒤로 가기" onClick={() => goBack('/home')}>
           <Icon name="arrow_left_light" size={28} />

@@ -106,17 +106,24 @@
   inset: -8px;
 }
 
+/* 타이틀(120~169) – 40px – 폴라로이드 278×420 – 40px – 인사이트 */
 .detail__polaroid {
   position: absolute;
-  left: 24px;
-  top: 202px;
-  width: 327px;
+  left: 48.5px;
+  top: 209px;
+  width: 278px;
+  height: 420px;
+}
+
+.detail__polaroid .pcard {
+  height: 100%;
+  aspect-ratio: auto;
 }
 
 .detail__insight {
   position: absolute;
   left: 24px;
-  top: 722px;
+  top: 669px;
   width: 327px;
 }
 
