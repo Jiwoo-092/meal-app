@@ -6,6 +6,7 @@ import { createContext, useContext, useLayoutEffect, useState, type CSSPropertie
  * - 디자인 좌표(px)를 그대로 쓰고, 전체를 한 번에 확대/축소한다 → 어떤 폰에서도 PNG로 본 것과 같은 비율.
  * - 상단 44px은 Figma의 상태바 자리. 브라우저/OS 상태바가 콘텐츠 밖에 있으면(일반 Safari, 홈 화면 앱 기본)
  *   이 영역을 잘라내고, 상태바 밑까지 콘텐츠가 깔리는 경우(safe-area-inset-top > 0)에는 그대로 둔다.
+ * - 모든 화면이 같은 배율을 쓰므로 홈·상세 등에서 탭바·글자 크기가 동일하다.
  */
 export const ART_W = 375;
 export const ART_H = 812;
@@ -13,8 +14,12 @@ export const STATUS_H = 44;
 
 interface Fit {
   scale: number;
-  left: number;
-  top: number;
+  /** 배율을 정할 때 쓴 화면 높이 (스크롤 화면에서는 주소창이 줄어들어도 유지) */
+  baseVh: number;
+  /** 잘라낸 상단 높이 (디자인 px) */
+  cut: number;
+  vw: number;
+  vh: number;
 }
 
 const Ctx = createContext<number>(1);
@@ -31,43 +36,97 @@ function readSafeTop(): number {
 }
 
 function computeFit(): Fit {
-  const vw = window.visualViewport?.width ?? window.innerWidth;
-  const vh = window.visualViewport?.height ?? window.innerHeight;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
   const cut = readSafeTop() > 0 ? 0 : STATUS_H;
-  const h = ART_H - cut;
-  const scale = Math.min(vw / ART_W, vh / h);
-  return {
-    scale,
-    left: (vw - ART_W * scale) / 2,
-    top: (vh - h * scale) / 2 - cut * scale,
-  };
+  const scale = Math.min(vw / ART_W, vh / (ART_H - cut));
+  return { scale, baseVh: vh, cut, vw, vh };
 }
 
-export function Artboard({ children, className = '' }: { children: ReactNode; className?: string }) {
-  const [fit, setFit] = useState<Fit>({ scale: 1, left: 0, top: -STATUS_H });
-
+/**
+ * stable: 폭이 그대로면 배율을 바꾸지 않는다 — 스크롤할 때 모바일 주소창이 접히며
+ * 화면 높이가 바뀌어도 레이아웃이 출렁이지 않게.
+ */
+function useFit(stable = false): Fit {
+  const [fit, setFit] = useState<Fit>(() =>
+    typeof window === 'undefined' ? { scale: 1, baseVh: ART_H, cut: STATUS_H, vw: ART_W, vh: ART_H } : computeFit(),
+  );
   useLayoutEffect(() => {
-    const update = () => setFit(computeFit());
+    const update = () =>
+      setFit((prev) => {
+        const next = computeFit();
+        if (stable && Math.abs(next.vw - prev.vw) < 1) return { ...prev, vh: next.vh };
+        return next;
+      });
     update();
     window.addEventListener('resize', update);
     window.addEventListener('orientationchange', update);
-    window.visualViewport?.addEventListener('resize', update);
     return () => {
       window.removeEventListener('resize', update);
       window.removeEventListener('orientationchange', update);
-      window.visualViewport?.removeEventListener('resize', update);
     };
   }, []);
+  return fit;
+}
 
+/** 한 화면(375×812)짜리 고정 아트보드 — 홈처럼 스크롤 없는 화면 */
+export function Artboard({ children, className = '' }: { children: ReactNode; className?: string }) {
+  const { scale, cut, vw, vh } = useFit();
+  const h = ART_H - cut;
   const style: CSSProperties = {
-    transform: `translate(${fit.left}px, ${fit.top}px) scale(${fit.scale})`,
+    transform: `translate(${(vw - ART_W * scale) / 2}px, ${(vh - h * scale) / 2 - cut * scale}px) scale(${scale})`,
   };
-
   return (
     <div className="screen">
       <div className={`artboard ${className}`} style={style}>
-        <Ctx.Provider value={fit.scale}>{children}</Ctx.Provider>
+        <Ctx.Provider value={scale}>{children}</Ctx.Provider>
       </div>
+    </div>
+  );
+}
+
+/**
+ * 세로로 긴 프레임(예: 375×1111)을 같은 배율로 그리고 페이지 스크롤로 보는 아트보드.
+ * overlay: 화면에 고정되는 요소(탭바 등) — 홈과 같은 위치·크기에 그려진다.
+ */
+export function ScrollArtboard({
+  height,
+  children,
+  overlay,
+  className = '',
+}: {
+  height: number;
+  children: ReactNode;
+  overlay?: ReactNode;
+  className?: string;
+}) {
+  const { scale, baseVh, cut, vw, vh } = useFit(true);
+  const h = height - cut;
+  // 탭바 등 고정 요소: 홈과 같은 화면 아래 여백을 유지하며 화면 바닥 기준으로 배치
+  const bottomGap = (baseVh - (ART_H - cut) * scale) / 2;
+  const left = (vw - ART_W * scale) / 2;
+  return (
+    <div className="screen-scroll">
+      <div className="screen-scroll__sizer" style={{ height: h * scale }}>
+        <div
+          className={`artboard artboard--scroll ${className}`}
+          style={{ height, transform: `translate(${left}px, ${-cut * scale}px) scale(${scale})` }}
+        >
+          <Ctx.Provider value={scale}>{children}</Ctx.Provider>
+        </div>
+      </div>
+      {overlay && (
+        <div className="screen-overlay" aria-hidden={false}>
+          <div
+            className="artboard artboard--overlay"
+            style={{
+              transform: `translate(${left}px, ${vh - bottomGap - ART_H * scale}px) scale(${scale})`,
+            }}
+          >
+            {overlay}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

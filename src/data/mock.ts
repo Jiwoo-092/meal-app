@@ -94,8 +94,8 @@ const MESSAGES: Record<MealDesignId, MessagePart[][]> = {
   ],
   salmon: [
     ['오늘은 ', { text: '몸을 생각한 한 끼', bg: '#A8F1BF' }, '였네요.'],
-    ['골고루 챙겨 먹은 자신을조금'],
-    [{ text: '더 뿌듯해해도', bg: '#FFE481' }, ' 좋겠어요.'],
+    ['골고루 챙겨 먹은 자신을 조금'],
+    [{ text: '더 칭찬해줘도', bg: '#FFE481' }, ' 좋겠어요.'],
   ],
   pasta: [
     ['오늘은 ', { text: '새로운 레시피를 발견', bg: '#B0C4FF' }, '했네요.'],
@@ -103,6 +103,16 @@ const MESSAGES: Record<MealDesignId, MessagePart[][]> = {
     [{ text: '이런 맛있는 식사는', bg: '#FF9B6D' }, ' 오래 기억해둬요.'],
   ],
 };
+
+/** 말풍선 안 텍스트 박스 위치 (222×81 말풍선 기준, Figma) */
+export const MESSAGE_BOX: Record<MealDesignId, { left: number; top: number; width: number }> = {
+  burger: { left: 37, top: 14, width: 159 },
+  salmon: { left: 36.8, top: 13.8, width: 158 },
+  pasta: { left: 31.8, top: 13.8, width: 177 },
+};
+
+/** 평균 식사 시간 (분) — time 게이지의 파란 '평균' 호 */
+export const AVG_MINUTES = 31.5;
 
 const BASE: Record<MealDesignId, Pick<Polaroid, 'title' | 'tempo' | 'minutes' | 'memo'>> = {
   burger: { title: '친구와 신나게 만든 수제버거', tempo: 'stable', minutes: 42, memo: '' },

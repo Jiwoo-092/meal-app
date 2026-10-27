@@ -1,0 +1,312 @@
+/* =========================================================
+ * 상세(polaroid detail) · 타이틀 수정(Edit) — Figma 375 기준 좌표, 홈과 같은 배율
+ * ======================================================= */
+
+/* ---------- 스크롤 아트보드 ---------- */
+.screen-scroll {
+  position: relative;
+  min-height: 100dvh;
+  background: var(--white);
+  overflow-x: hidden;
+}
+
+.screen-scroll__sizer {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.artboard--scroll {
+  touch-action: pan-y;
+  overflow: hidden;
+}
+
+.screen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.artboard--overlay,
+.artboard--overlay * {
+  pointer-events: none;
+}
+
+.artboard--overlay .tabbar,
+.artboard--overlay .tabbar * {
+  pointer-events: auto;
+}
+
+/* ---------- 서브 헤더 (Archive / Edit) ---------- */
+.sub-header {
+  position: absolute;
+  left: 0;
+  top: 42px;
+  z-index: 50;
+  width: 375px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 24px;
+}
+
+.sub-header__btn {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--black);
+}
+
+.sub-header__title {
+  margin: 0;
+  padding: 5px 18px;
+  font-family: var(--font-head);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #000;
+}
+
+/* ---------- 상세 ---------- */
+.detail__title {
+  position: absolute;
+  left: 0;
+  top: 120px;
+  width: 375px;
+  padding: 0 52px;
+  text-align: center;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.detail__edit {
+  position: absolute;
+  left: 323px;
+  top: 131px;
+  z-index: 5;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--black);
+}
+
+.detail__edit::after {
+  /* 터치 영역 44px 확보 */
+  content: '';
+  position: absolute;
+  inset: -8px;
+}
+
+.detail__polaroid {
+  position: absolute;
+  left: 24px;
+  top: 202px;
+  width: 327px;
+}
+
+.detail__insight {
+  position: absolute;
+  left: 24px;
+  top: 722px;
+  width: 327px;
+}
+
+/* ---------- 밀로 인사이트 ---------- */
+.insight {
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+}
+
+.insight-msg {
+  position: relative;
+  height: 90px;
+  will-change: opacity, transform;
+}
+
+.insight-msg__character {
+  position: absolute;
+  left: 3.5px;
+  top: 0;
+  width: 90px;
+  height: 90px;
+}
+
+.insight-msg__bubble {
+  position: absolute;
+  left: 101.5px;
+  top: 0.5px;
+  width: 222px;
+  height: 81px;
+  border: 1px solid var(--mealo-peach-orange);
+  border-radius: 40.5px 40.5px 40.5px 3px; /* Figma 47·58·58·3 → 높이 81의 절반으로 제한 */
+  background: var(--white);
+}
+
+.insight-msg__text {
+  position: absolute;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--gray-800);
+}
+
+.insight-msg__line {
+  display: block;
+  white-space: nowrap;
+}
+
+.insight-msg__text mark {
+  padding: 0;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.insight__cards {
+  display: flex;
+  gap: 17px;
+}
+
+.insight-card {
+  position: relative;
+  width: 155px;
+  height: 147px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--gray-100);
+  overflow: hidden;
+}
+
+.insight-card__gauge {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+}
+
+.insight-card__caption {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--gray-500);
+  text-align: center;
+}
+
+.insight-card__value {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--gray-800);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.insight-card__caption--tempo {
+  position: absolute;
+  left: 0;
+  top: 83px;
+  width: 155px;
+}
+
+.insight-card__value--tempo {
+  position: absolute;
+  left: 0;
+  top: 98px;
+  width: 155px;
+}
+
+.insight-card__ghost {
+  visibility: hidden;
+}
+
+.insight-card__legend-dot {
+  position: absolute;
+  left: 7px;
+  top: 11px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--mealo-skyblue);
+}
+
+.insight-card__legend {
+  position: absolute;
+  left: 20px;
+  top: 8px;
+  margin: 0;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--gray-500);
+}
+
+.insight-card__center {
+  position: absolute;
+  left: 0;
+  top: 55px;
+  width: 155px;
+}
+
+/* ---------- 타이틀 수정 ---------- */
+.edit__field {
+  position: absolute;
+  left: 26px;
+  top: 207px;
+  width: 325px;
+  margin: 0;
+}
+
+.edit__buttons {
+  position: absolute;
+  left: 26px;
+  top: 336px;
+  width: 325px;
+  display: flex;
+  gap: 17px;
+}
+
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 154px;
+  height: 54px;
+  padding: 0 32px;
+  border-radius: 32px;
+  font-family: var(--font-suit);
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: nowrap;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.pill-btn--stroke {
+  border: 1px solid var(--gray-500);
+  background: var(--white);
+  color: var(--gray-700);
+}
+
+.pill-btn--fill {
+  background: var(--gray-800);
+  color: var(--white);
+}
+
+.pill-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pill-btn:active:not(:disabled) {
+  opacity: 0.8;
+}

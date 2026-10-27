@@ -19,6 +19,10 @@ export default function HomePage() {
   return <MealDay items={today} />;
 }
 
+const ORDINALS = ['first', 'second', 'third'];
+/** 하루 중 몇 번째 끼니인지 — Figma 'first / second / third' 칩 */
+const ordinal = (i: number) => ORDINALS[i] ?? `${i + 1}th`;
+
 /** 홈 헤더 — 좌측 슬롯(뒤로가기 등) · 로고 · 설정 */
 export function HomeHeader({ left }: { left?: ReactNode }) {
   return (
@@ -48,6 +52,7 @@ export function MealDay({ items, header }: { items: Polaroid[]; header?: ReactNo
       {current ? (
         <>
           <div className="home__title" key={current.id}>
+            <span className="home__order">{ordinal(index)}</span>
             <p className="home__stamp">{formatStamp(current.date, current.time)}</p>
             <h1 className="home__name">{current.title}</h1>
           </div>

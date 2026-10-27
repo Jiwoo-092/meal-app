@@ -22,8 +22,8 @@ type P = Record<string, string>;
  */
 const ROUTES: { path: string; layout: 'full' | 'nav' | 'plain'; render: (p: P) => ReactNode }[] = [
   { path: '/home', layout: 'full', render: () => <HomePage /> },
-  { path: '/polaroids/:id', layout: 'nav', render: (p) => <PolaroidDetailPage id={p.id} /> },
-  { path: '/polaroids/:id/title', layout: 'plain', render: (p) => <TitleEditPage id={p.id} /> },
+  { path: '/polaroids/:id', layout: 'full', render: (p) => <PolaroidDetailPage id={p.id} /> },
+  { path: '/polaroids/:id/title', layout: 'full', render: (p) => <TitleEditPage id={p.id} /> },
   { path: '/polaroids/:id/edit', layout: 'plain', render: (p) => <PolaroidEditPage id={p.id} /> },
   { path: '/archive/calendar', layout: 'nav', render: () => <ArchiveCalendarPage /> },
   { path: '/archive/days/:date', layout: 'full', render: (p) => <ArchiveDayPage date={p.date} /> },

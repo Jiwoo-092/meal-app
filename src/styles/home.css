@@ -22,7 +22,13 @@
   font-family: var(--font-suit);
   color: var(--gray-800);
   isolation: isolate;
-  touch-action: pan-y;
+  touch-action: manipulation;
+}
+
+/* 홈은 스크롤이 없으므로 브라우저 제스처(스크롤·확대·당겨서 새로고침)를 막아 스와이프가 끊기지 않게 */
+.artboard.home {
+  touch-action: none;
+  overscroll-behavior: none;
 }
 
 /* ---------- 배경 글로우 (Ellipse 1218) — 은은하게 숨쉬듯 ---------- */
@@ -115,6 +121,20 @@
   animation: title-in 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+.home__order {
+  display: inline-flex;
+  align-items: center;
+  height: 17px;
+  margin-bottom: 2px;
+  padding: 0 7px;
+  border: 1px solid var(--mealo-red-orange);
+  border-radius: 50px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--mealo-red-orange);
+}
+
 .home__stamp {
   margin: 0;
   font-size: 16px;
@@ -165,23 +185,38 @@
   -webkit-touch-callout: none;
 }
 
-.pstack__card[role='button'] {
+.pstack__card {
+  pointer-events: none;
+}
+
+/* 제스처 영역 — 카드 위(제목 아래)부터 인디케이터 위까지 */
+.pstack__hit {
+  position: absolute;
+  left: 0;
+  top: -40px;
+  width: 375px;
+  height: 425px;
+  z-index: 45;
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.pstack__card[role='button']:focus-visible {
-  outline: none;
+.pstack__hit:active {
+  cursor: grabbing;
 }
 
-.pstack__card[role='button']:focus-visible .pcard__frame {
+.pstack__hit:focus-visible {
   outline: 2px solid var(--mealo-red-orange);
-  outline-offset: 3px;
+  outline-offset: -2px;
+  border-radius: 12px;
 }
 
 .pstack__card.is-dragging {
   transition: none;
-  cursor: grabbing;
 }
 
 .pstack__card.is-tucking {
