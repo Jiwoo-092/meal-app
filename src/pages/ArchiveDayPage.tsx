@@ -1,28 +1,28 @@
-import Icon from '../components/Icon';
-import { isValidDate } from '../data/utils';
+import SubHeader from '../components/SubHeader';
+import { CALENDAR_DAY_ITEMS } from '../data/mock';
+import { formatTime, isValidDate } from '../data/utils';
 import { goBack } from '../lib/router';
 import { usePolaroids } from '../store/PolaroidStore';
-import { HomeHeader, MealDay } from './HomePage';
+import { MealDay } from './HomePage';
 import NotFoundPage from './NotFoundPage';
 
-/** 아카이빙 · 날짜별 폴라로이드 모음 — 홈과 동일한 폴라로이드 UI */
+/**
+ * 아카이브 · 날짜별 모음 — Figma 'archive: calendar2'
+ * 홈과 같은 폴라로이드 화면, 헤더 가운데는 선택한 날짜(11.25), 제목 위에는 시간만.
+ */
 export default function ArchiveDayPage({ date }: { date: string }) {
-  const { polaroids } = usePolaroids();
+  const { getById } = usePolaroids();
   if (!isValidDate(date)) return <NotFoundPage message="올바르지 않은 날짜예요." />;
-  const items = polaroids.filter((p) => p.date === date);
+  const items = CALENDAR_DAY_ITEMS.map(getById).filter((p) => p !== undefined);
+  const title = `${date.slice(5, 7)}.${date.slice(8, 10)}`;
 
   return (
     <MealDay
+      key={date}
       items={items}
-      header={
-        <HomeHeader
-          left={
-            <button type="button" className="icon-btn-28" aria-label="뒤로 가기" onClick={() => goBack('/archive/calendar')}>
-              <Icon name="arrow_left_light" size={28} />
-            </button>
-          }
-        />
-      }
+      header={<SubHeader title={title} onBack={() => goBack('/archive/calendar')} />}
+      stamp={(p) => formatTime(p.time)}
+      detailPath={(id) => `/archive/polaroids/${id}`}
     />
   );
 }

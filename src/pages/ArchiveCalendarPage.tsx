@@ -1,101 +1,95 @@
-import { useMemo, useState } from 'react';
-import { Link } from '../lib/router';
 import ArchiveTabs from '../components/ArchiveTabs';
-import { IconChevronLeft, IconChevronRight } from '../components/Icons';
-import TopBar from '../components/TopBar';
-import type { Polaroid } from '../data/mock';
+import SubHeader from '../components/SubHeader';
+import TabBar from '../components/TabBar';
+import { CALENDAR, CALENDAR_DOTS, CALENDAR_SELECTED_DAY } from '../data/mock';
 import { toDateKey } from '../data/utils';
-import { usePolaroids } from '../store/PolaroidStore';
+import { Artboard } from '../lib/artboard';
+import { goBack, Link } from '../lib/router';
 
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+const WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+/** Figma 그대로 강조된 요일 */
+const WEEK_ACTIVE = 'Fri';
 
-/** 아카이빙 · 캘린더 보기 (월간) */
+type Cell = { day: number; outside: boolean };
+
+/**
+ * 달력 칸 — Figma에 배치된 그대로 (실제 2026년 11월 요일과 다름, 디자인에서 임의로 정한 배치 유지)
+ * 첫 줄: 30 31(지난달) 01~05 / 마지막 줄: 27~30, 01 02 03(다음달)
+ */
+const CELLS: Cell[] = [
+  { day: 30, outside: true },
+  { day: 31, outside: true },
+  ...Array.from({ length: 30 }, (_, i) => ({ day: i + 1, outside: false })),
+  { day: 1, outside: true },
+  { day: 2, outside: true },
+  { day: 3, outside: true },
+];
+
+/**
+ * 아카이브 · 캘린더 — Figma 'archive: calendar' (2026년 11월, 기록 표시는 디자인에서 임의로 정한 그대로)
+ * 색 원이 있는 날짜만 눌러서 그날의 폴라로이드 모음으로 이동.
+ */
 export default function ArchiveCalendarPage() {
-  const { polaroids } = usePolaroids();
-
-  // 전시용: 가장 최근 기록이 있는 달에서 시작
-  const latest = polaroids[0]?.date ?? toDateKey(new Date().getFullYear(), new Date().getMonth(), 1);
-  const [cursor, setCursor] = useState(() => ({
-    year: Number(latest.slice(0, 4)),
-    month: Number(latest.slice(5, 7)) - 1,
-  }));
-
-  const byDate = useMemo(() => {
-    const map = new Map<string, Polaroid[]>();
-    polaroids.forEach((p) => map.set(p.date, [...(map.get(p.date) ?? []), p]));
-    return map;
-  }, [polaroids]);
-
-  const firstDay = new Date(cursor.year, cursor.month, 1).getDay();
-  const daysInMonth = new Date(cursor.year, cursor.month + 1, 0).getDate();
-  const now = new Date();
-  const todayKey = toDateKey(now.getFullYear(), now.getMonth(), now.getDate());
-
-  const move = (delta: number) =>
-    setCursor(({ year, month }) => {
-      const d = new Date(year, month + delta, 1);
-      return { year: d.getFullYear(), month: d.getMonth() };
-    });
+  const { year, month } = CALENDAR;
+  const cells = CELLS;
+  const weeks = Array.from({ length: cells.length / 7 }, (_, i) => cells.slice(i * 7, i * 7 + 7));
 
   return (
-    <>
-      <TopBar title="아카이빙" />
-      <ArchiveTabs />
-      <section className="page" aria-labelledby="cal-month">
-        <div className="calendar__head">
-          <button type="button" className="icon-btn" onClick={() => move(-1)} aria-label="이전 달">
-            <IconChevronLeft />
-          </button>
-          <h2 id="cal-month" className="calendar__month" aria-live="polite">
-            {cursor.year}년 {cursor.month + 1}월
-          </h2>
-          <button type="button" className="icon-btn" onClick={() => move(1)} aria-label="다음 달">
-            <IconChevronRight />
-          </button>
-        </div>
+    <Artboard className="archive">
+      <SubHeader word="archive" onBack={() => goBack('/home')} />
+      <ArchiveTabs active="calendar" />
 
-        <div className="calendar__grid" role="grid" aria-labelledby="cal-month">
-          {WEEKDAYS.map((w) => (
-            <div key={w} className="calendar__weekday" role="columnheader">
+      <div className="cal__today">
+        <img src="/assets/type/date-14.svg" alt="14일" width={43} height={39} />
+        <span>mon</span>
+      </div>
+      <div className="cal__month">
+        <img src="/assets/type/november.svg" alt="november" width={129} height={39} />
+        <img src="/assets/type/year-2026.svg" alt="2026" width={47} height={28} />
+      </div>
+
+      <div className="cal__days">
+        <div className="cal__week">
+          {WEEK.map((w) => (
+            <span key={w} className={w === WEEK_ACTIVE ? 'is-active' : ''}>
               {w}
-            </div>
+            </span>
           ))}
-          {Array.from({ length: firstDay }).map((_, i) => (
-            <div key={`blank-${i}`} aria-hidden="true" />
-          ))}
-          {Array.from({ length: daysInMonth }).map((_, i) => {
-            const day = i + 1;
-            const key = toDateKey(cursor.year, cursor.month, day);
-            const items = byDate.get(key) ?? [];
-            const cls = [
-              'calendar__cell',
-              items.length ? 'calendar__cell--has' : '',
-              key === todayKey ? 'calendar__cell--today' : '',
-            ].join(' ');
-
-            if (!items.length) {
-              return (
-                <div key={key} className={cls} role="gridcell" aria-label={`${cursor.month + 1}월 ${day}일, 기록 없음`}>
-                  {day}
-                </div>
-              );
-            }
-            return (
-              <Link
-                key={key}
-                to={`/archive/days/${key}`}
-                className={cls}
-                role="gridcell"
-                aria-label={`${cursor.month + 1}월 ${day}일, 폴라로이드 ${items.length}장`}
-              >
-                <span>{day}</span>
-                <span className="calendar__dot" aria-hidden="true" />
-                {items.length > 1 && <span className="calendar__count" aria-hidden="true">+{items.length - 1}</span>}
-              </Link>
-            );
-          })}
         </div>
-      </section>
-    </>
+        {weeks.map((row, i) => (
+          <div className="cal__row" key={i}>
+            {row.map((c, j) => {
+              const label = String(c.day).padStart(2, '0');
+              const dots = c.outside ? undefined : CALENDAR_DOTS[c.day];
+              if (dots) {
+                return (
+                  <Link
+                    key={j}
+                    to={`/archive/days/${toDateKey(year, month - 1, c.day)}`}
+                    className="cal__date is-marked"
+                    aria-label={`${month}월 ${c.day}일 기록 보기`}
+                  >
+                    <span className="cal__num">{label}</span>
+                    <span className="cal__dots">
+                      {dots.map((color, k) => (
+                        <i key={k} style={{ background: color }} />
+                      ))}
+                    </span>
+                  </Link>
+                );
+              }
+              const selected = !c.outside && c.day === CALENDAR_SELECTED_DAY;
+              return (
+                <span key={j} className={`cal__date${c.outside ? ' is-outside' : ''}${selected ? ' is-selected' : ''}`}>
+                  <span className="cal__num">{label}</span>
+                </span>
+              );
+            })}
+          </div>
+        ))}
+      </div>
+
+      <TabBar inArtboard />
+    </Artboard>
   );
 }

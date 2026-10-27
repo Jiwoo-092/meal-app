@@ -149,6 +149,74 @@ export const POLAROIDS: Polaroid[] = [
   meal('p13', 'pasta', '2026-09-04', '19:40'),
 ];
 
+/* ---------- 아카이브 ---------- */
+
+/** 키워드 폴더 색 — Figma 'archive folder' (뒤 종이 2장 + 폴라로이드) */
+export const FOLDER_TONES: Record<KeywordId, { back: string; mid: string; card: string }> = {
+  relation: { back: '#ead6d6', mid: '#f3dada', card: '#ffd6d6' },
+  taste: { back: '#e8d0bf', mid: '#f1dacb', card: '#ffe6d5' },
+  health: { back: '#e4ecc9', mid: '#ebf3ce', card: '#f5ffd1' },
+  achievement: { back: '#e6e2bd', mid: '#f4f0c6', card: '#fffbca' },
+  discovery: { back: '#d8cbe8', mid: '#e2d9ee', card: '#ead9ff' },
+};
+
+/** 키워드 폴더 안 썸네일 — 사진은 추후 교체 예정이라 일단 하나로 통일 */
+export const ARCHIVE_THUMB = '/assets/food/meal-3.webp';
+
+/** 키워드별로 상세에 쓸 식사 디자인 (해당 키워드 스티커가 붙은 식사) */
+const KEYWORD_DESIGNS: Record<KeywordId, MealDesignId[]> = {
+  relation: ['burger'],
+  taste: ['pasta'],
+  health: ['salmon'],
+  achievement: ['burger', 'salmon'],
+  discovery: ['pasta'],
+};
+
+/** 키워드 폴더 속 폴라로이드 (키워드당 6장, 날짜·시간 겹치지 않게) */
+const ARCHIVE_SLOTS: Record<KeywordId, [string, string][]> = {
+  relation: [['2026-11-13', '19:24'], ['2026-11-08', '12:40'], ['2026-11-02', '18:05'], ['2026-10-27', '13:15'], ['2026-10-19', '20:12'], ['2026-10-11', '11:48']],
+  taste: [['2026-11-12', '12:30'], ['2026-11-06', '19:40'], ['2026-10-30', '08:55'], ['2026-10-24', '18:20'], ['2026-10-15', '13:05'], ['2026-10-07', '20:35']],
+  health: [['2026-11-11', '08:10'], ['2026-11-07', '12:15'], ['2026-11-04', '18:45'], ['2026-10-28', '07:50'], ['2026-10-20', '12:25'], ['2026-10-09', '19:10']],
+  achievement: [['2026-11-13', '13:00'], ['2026-11-09', '19:30'], ['2026-11-03', '11:20'], ['2026-10-25', '18:50'], ['2026-10-17', '12:05'], ['2026-10-05', '20:40']],
+  discovery: [['2026-11-12', '20:10'], ['2026-11-05', '13:35'], ['2026-11-01', '09:25'], ['2026-10-22', '19:55'], ['2026-10-13', '12:50'], ['2026-10-03', '18:15']],
+};
+
+export const ARCHIVE_POLAROIDS: Polaroid[] = (Object.keys(ARCHIVE_SLOTS) as KeywordId[]).flatMap((k) =>
+  ARCHIVE_SLOTS[k].map(([date, time], i) => {
+    const designs = KEYWORD_DESIGNS[k];
+    return meal(`a-${k}-${i + 1}`, designs[i % designs.length], date, time);
+  }),
+);
+
+/** 폴더(키워드)별 폴라로이드 id 목록 */
+export const ARCHIVE_BY_KEYWORD: Record<KeywordId, string[]> = Object.fromEntries(
+  (Object.keys(ARCHIVE_SLOTS) as KeywordId[]).map((k) => [k, ARCHIVE_SLOTS[k].map((_, i) => `a-${k}-${i + 1}`)]),
+) as Record<KeywordId, string[]>;
+
+/**
+ * 캘린더 — Figma 'archive: calendar' 그대로 (2026년 11월, 임의 설정한 기록 표시 유지)
+ * 키워드 색: 관계 strawberry · 맛 coral · 성취감 lemon · 건강 mint · 발견 skyblue
+ */
+export const CALENDAR = { year: 2026, month: 11 };
+export const CALENDAR_SELECTED_DAY = 14;
+export const CALENDAR_DOTS: Record<number, string[]> = {
+  1: ['#ff6364', '#a8f1bf', '#b0c4ff'],
+  2: ['#ff9b6d', '#ff6364', '#b0c4ff'],
+  3: ['#ff9b6d', '#fdff82'],
+  4: ['#ff9b6d', '#a8f1bf', '#b0c4ff'],
+  5: ['#a8f1bf', '#b0c4ff'],
+  6: ['#ff9b6d', '#fdff82', '#b0c4ff'],
+  7: ['#fdff82', '#a8f1bf', '#b0c4ff'],
+  8: ['#ff6364', '#ff9b6d'],
+  9: ['#ff9b6d', '#fdff82'],
+  10: ['#ff9b6d', '#a8f1bf'],
+  11: ['#ff6364', '#ff9b6d', '#a8f1bf'],
+  12: ['#ff6364', '#b0c4ff'],
+  13: ['#ff6364', '#ff9b6d', '#fdff82'],
+};
+/** 날짜별 모음에 보여줄 폴라로이드 — 사진·정보는 추후 교체, 일단 홈의 세 끼로 */
+export const CALENDAR_DAY_ITEMS = ['p01', 'p02', 'p03'];
+
 /** 전시 기준 '오늘' (캘린더 강조용) */
 export const DEMO_TODAY = '2026-09-23';
 

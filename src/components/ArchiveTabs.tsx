@@ -1,18 +1,29 @@
-import { Link, usePathname } from '../lib/router';
-import { IconCalendar, IconFolder } from './Icons';
+import { Link } from '../lib/router';
+import Icon from './Icon';
 
-/** 아카이빙 상단 캘린더 / 폴더 보기 전환 버튼 */
-export default function ArchiveTabs() {
-  const pathname = usePathname();
-  const isFolder = pathname.startsWith('/archive/folders');
+/** 아카이브 상단 탭 — Figma 'tab' (60×48 두 개, 간격 12): 왼쪽 키워드 폴더 · 오른쪽 캘린더 */
+export default function ArchiveTabs({ active }: { active: 'keyword' | 'calendar' }) {
+  const tabs = [
+    { id: 'keyword', to: '/archive/folders', label: '키워드 아카이브', icon: 'card', on: 'card' },
+    { id: 'calendar', to: '/archive/calendar', label: '캘린더', icon: 'calendar', on: 'calendar_fill' },
+  ] as const;
   return (
-    <nav className="segmented" aria-label="아카이빙 보기 전환">
-      <Link to="/archive/calendar" className="segmented__item" aria-current={!isFolder ? 'page' : undefined}>
-        <IconCalendar />&nbsp;캘린더
-      </Link>
-      <Link to="/archive/folders" className="segmented__item" aria-current={isFolder ? 'page' : undefined}>
-        <IconFolder />&nbsp;폴더
-      </Link>
+    <nav className="archive-tabs" aria-label="아카이브 보기 전환">
+      {tabs.map((t) => {
+        const on = t.id === active;
+        return (
+          <Link
+            key={t.id}
+            to={t.to}
+            replace
+            className={`archive-tabs__tap${on ? ' is-active' : ''}`}
+            aria-label={t.label}
+            aria-current={on ? 'page' : undefined}
+          >
+            <Icon name={on ? t.on : t.icon} size={32} />
+          </Link>
+        );
+      })}
     </nav>
   );
 }

@@ -32,7 +32,6 @@
 
   /* typography */
   --font-suit: 'SUIT Variable', 'SUIT', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
-  --font-head: 'BC Alphapipe TEST', 'Poppins', var(--font-suit);
   --font-num: 'Poppins', var(--font-suit);
 
   /* ---- 이전 와이어프레임 호환 (화면 리빌드 후 정리 예정) ---- */

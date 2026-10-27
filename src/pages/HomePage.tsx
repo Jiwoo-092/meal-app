@@ -37,7 +37,18 @@ export function HomeHeader({ left }: { left?: ReactNode }) {
 }
 
 /** 홈과 날짜별 모음이 함께 쓰는 하루 화면 (375×812 아트보드) */
-export function MealDay({ items, header }: { items: Polaroid[]; header?: ReactNode }) {
+export function MealDay({
+  items,
+  header,
+  stamp = (p) => formatStamp(p.date, p.time),
+  detailPath,
+}: {
+  items: Polaroid[];
+  header?: ReactNode;
+  /** 제목 위 날짜·시간 표기 (캘린더 날짜별 화면은 시간만) */
+  stamp?: (p: Polaroid) => string;
+  detailPath?: (id: string) => string;
+}) {
   const [index, setIndex] = useState(0);
   const current = items[index] ?? items[0];
 
@@ -53,11 +64,11 @@ export function MealDay({ items, header }: { items: Polaroid[]; header?: ReactNo
         <>
           <div className="home__title" key={current.id}>
             <span className="home__order">{ordinal(index)}</span>
-            <p className="home__stamp">{formatStamp(current.date, current.time)}</p>
+            <p className="home__stamp">{stamp(current)}</p>
             <h1 className="home__name">{current.title}</h1>
           </div>
 
-          <PolaroidStack items={items} onChange={setIndex} />
+          <PolaroidStack items={items} onChange={setIndex} detailPath={detailPath} />
 
           {items.length > 1 && (
             <div className="home__indicator" aria-hidden="true">

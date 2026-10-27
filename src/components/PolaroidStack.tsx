@@ -65,6 +65,8 @@ interface Props {
   items: PolaroidData[];
   /** 앞 카드가 바뀔 때 (제목·인디케이터 갱신용) */
   onChange?: (index: number) => void;
+  /** 앞 카드를 탭했을 때 갈 상세 경로 (기본 /polaroids/:id) */
+  detailPath?: (id: string) => string;
 }
 
 type Gesture = {
@@ -80,7 +82,7 @@ type Gesture = {
   onCard: boolean;
 };
 
-export default function PolaroidStack({ items, onChange }: Props) {
+export default function PolaroidStack({ items, onChange, detailPath = (id) => `/polaroids/${id}` }: Props) {
   const ids = items.map((p) => p.id);
   const [order, setOrder] = useState<string[]>(ids);
   const [drag, setDrag] = useState<{ dx: number; active: boolean }>({ dx: 0, active: false });
@@ -210,7 +212,7 @@ export default function PolaroidStack({ items, onChange }: Props) {
 
     if (!cancelled && !g.moved) {
       // 탭: 앞 카드 위였을 때만 상세로
-      if (g.onCard) navigate(`/polaroids/${orderRef.current[0]}`);
+      if (g.onCard) navigate(detailPath(orderRef.current[0]));
       return;
     }
     if (g.axis !== 'x' || !canSwipe) return;
@@ -222,7 +224,7 @@ export default function PolaroidStack({ items, onChange }: Props) {
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      navigate(`/polaroids/${orderRef.current[0]}`);
+      navigate(detailPath(orderRef.current[0]));
     } else if (e.key === 'ArrowLeft') {
       e.preventDefault();
       advance(-1);

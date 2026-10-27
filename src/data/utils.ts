@@ -26,10 +26,28 @@ export function formatDate(value: string): string {
   return `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')} (${week})`;
 }
 
-/** Sep 20 11:30 — Figma 폴라로이드 상단 표기 */
+/** 11:30am · 15:15pm — Figma 폴라로이드 위 시간 표기 (24시간 + am/pm) */
+export function formatTime(time: string): string {
+  const h = Number(time.slice(0, 2));
+  return `${time}${h < 12 ? 'am' : 'pm'}`;
+}
+
+/** Sep 20 11:30am — Figma 폴라로이드 상단 표기 */
 export function formatStamp(date: string, time: string): string {
   const d = new Date(`${date}T00:00:00`);
-  return `${MONTHS[d.getMonth()]} ${d.getDate()} ${time}`;
+  return `${MONTHS[d.getMonth()]} ${d.getDate()} ${formatTime(time)}`;
+}
+
+/** 08:12 pm — 키워드 폴더 썸네일 아래 시간 (12시간) */
+export function formatTime12(time: string): string {
+  const [h, m] = time.split(':').map(Number);
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${String(h12).padStart(2, '0')}:${String(m).padStart(2, '0')} ${h < 12 ? 'am' : 'pm'}`;
+}
+
+/** 26.09.20 — 키워드 폴더 썸네일 아래 날짜 */
+export function formatShortDate(date: string): string {
+  return `${date.slice(2, 4)}.${date.slice(5, 7)}.${date.slice(8, 10)}`;
 }
 
 export function toDateKey(year: number, monthIndex: number, day: number): string {

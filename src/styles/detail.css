@@ -64,14 +64,26 @@
   color: var(--black);
 }
 
+/* 텍스트 타이틀 (예: 캘린더 날짜 11.25) — SUIT Bold 20 */
 .sub-header__title {
   margin: 0;
   padding: 5px 18px;
-  font-family: var(--font-head);
+  font-family: var(--font-suit);
   font-size: 20px;
   font-weight: 700;
   line-height: 1.4;
   color: #000;
+}
+
+/* BC Alphapipe 타이틀 — 폰트 대신 SVG (Figma 'logo' 프레임 크기 그대로, 여백 포함) */
+.sub-header__word {
+  margin: 0;
+  display: flex;
+  line-height: 0;
+}
+
+.sub-header__word img {
+  display: block;
 }
 
 /* ---------- 상세 ---------- */

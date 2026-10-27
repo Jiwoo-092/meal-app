@@ -25,14 +25,17 @@ const ROUTES: { path: string; layout: 'full' | 'nav' | 'plain'; render: (p: P) =
   { path: '/polaroids/:id', layout: 'full', render: (p) => <PolaroidDetailPage id={p.id} /> },
   { path: '/polaroids/:id/title', layout: 'full', render: (p) => <TitleEditPage id={p.id} /> },
   { path: '/polaroids/:id/edit', layout: 'plain', render: (p) => <PolaroidEditPage id={p.id} /> },
-  { path: '/archive/calendar', layout: 'nav', render: () => <ArchiveCalendarPage /> },
+  { path: '/archive/folders', layout: 'full', render: () => <ArchiveFoldersPage /> },
+  { path: '/archive/folders/:keyword', layout: 'full', render: (p) => <ArchiveFolderPage keyword={p.keyword} /> },
+  { path: '/archive/calendar', layout: 'full', render: () => <ArchiveCalendarPage /> },
   { path: '/archive/days/:date', layout: 'full', render: (p) => <ArchiveDayPage date={p.date} /> },
-  { path: '/archive/folders', layout: 'nav', render: () => <ArchiveFoldersPage /> },
-  { path: '/archive/folders/:keyword', layout: 'nav', render: (p) => <ArchiveFolderPage keyword={p.keyword} /> },
+  // 아카이브에서 연 상세·타이틀 수정 (탭바 아카이브 선택 유지)
+  { path: '/archive/polaroids/:id', layout: 'full', render: (p) => <PolaroidDetailPage id={p.id} archive /> },
+  { path: '/archive/polaroids/:id/title', layout: 'full', render: (p) => <TitleEditPage id={p.id} archive /> },
   { path: '/light-color', layout: 'nav', render: () => <LightColorPage /> },
 ];
 
-const REDIRECTS: Record<string, string> = { '/': '/home', '/archive': '/archive/calendar' };
+const REDIRECTS: Record<string, string> = { '/': '/home', '/archive': '/archive/folders' };
 
 function Router() {
   const pathname = usePathname().replace(/\/+$/, '') || '/';
