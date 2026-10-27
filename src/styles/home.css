@@ -208,6 +208,14 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+.pstack__tapzone {
+  position: absolute;
+  left: 69px; /* 앞 카드 238×345, .pstack__hit 기준 (top -40 보정) */
+  top: 40px;
+  width: 238px;
+  height: 345px;
+}
+
 .pstack__hit:active {
   cursor: grabbing;
 }

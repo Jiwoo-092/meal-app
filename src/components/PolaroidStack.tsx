@@ -28,7 +28,6 @@ const POSE = {
 const SWIPE_DISTANCE = 50; // px(디자인 기준) 이상 밀면 넘김
 const SWIPE_VELOCITY = 0.35; // px/ms 이상으로 튕기면 넘김
 const TAP_SLOP = 8; // px 이하 움직임은 탭
-const HIT_TOP = -40; // 제스처 영역 시작 위치 (home.css .pstack__hit top 과 맞출 것)
 
 /** 맨 뒤로 들어가는 모션 */
 const TUCK_MS = 720;
@@ -77,6 +76,8 @@ type Gesture = {
   vx: number;
   moved: boolean;
   axis: 'x' | 'y' | null;
+  /** 누른 위치가 앞 카드 위였는지 (브라우저 hit-test 결과) */
+  onCard: boolean;
 };
 
 export default function PolaroidStack({ items, onChange }: Props) {
@@ -177,7 +178,9 @@ export default function PolaroidStack({ items, onChange }: Props) {
       /* noop */
     }
     const now = performance.now();
-    gesture.current = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, lastT: now, vx: 0, moved: false, axis: null };
+    // 앞 카드 위인지는 좌표 계산 대신 브라우저 hit-test(e.target)로 판단 — 화면 배율(zoom)과 무관하게 정확
+    const onCard = (e.target as Element).classList?.contains('pstack__tapzone') ?? false;
+    gesture.current = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, lastT: now, vx: 0, moved: false, axis: null, onCard };
   };
 
   const onPointerMove = (e: PointerEvent<HTMLDivElement>) => {
@@ -206,12 +209,8 @@ export default function PolaroidStack({ items, onChange }: Props) {
     setDrag({ dx: 0, active: false });
 
     if (!cancelled && !g.moved) {
-      // 탭: 앞 카드(디자인 좌표 x 69~307, y 0~345) 위였을 때만 상세로
-      const r = e.currentTarget.getBoundingClientRect();
-      const k = r.width / 375 || 1;
-      const lx = (e.clientX - r.left) / k;
-      const ly = (e.clientY - r.top) / k + HIT_TOP;
-      if (lx >= 69 && lx <= 307 && ly >= 0 && ly <= 345) navigate(`/polaroids/${orderRef.current[0]}`);
+      // 탭: 앞 카드 위였을 때만 상세로
+      if (g.onCard) navigate(`/polaroids/${orderRef.current[0]}`);
       return;
     }
     if (g.axis !== 'x' || !canSwipe) return;
@@ -280,7 +279,10 @@ export default function PolaroidStack({ items, onChange }: Props) {
         onLostPointerCapture={(e) => finish(e, true)}
         onKeyDown={onKeyDown}
         onContextMenu={(e) => e.preventDefault()}
-      />
+      >
+        {/* 앞 카드 자리 — 탭 판정용 */}
+        <div className="pstack__tapzone" aria-hidden="true" />
+      </div>
       {front && <span className="sr-only" aria-live="polite">{`${formatStamp(front.date, front.time)} ${front.title}`}</span>}
     </div>
   );
