@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#ffffff" />
-    <!-- 홈 화면에 추가 시 전체 화면 앱처럼 열리도록 (전시용) -->
+    <!-- 홈 화면에 추가 시 전체 화면 앱처럼 열리도록 (전시용)
+         manifest의 scope "/" — 사이트 안 모든 화면이 앱 범위라서 상세 등으로 이동해도 Safari 주소창·툴바가 뜨지 않음 -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
