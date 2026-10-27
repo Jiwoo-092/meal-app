@@ -69,18 +69,52 @@ function useFit(stable = false): Fit {
   return fit;
 }
 
+/** 기기 픽셀 단위로 반올림 — 반 픽셀 위치에 그려져 흐려지는 것 방지 */
+function snap(v: number) {
+  const dpr = window.devicePixelRatio || 1;
+  return Math.round(v * dpr) / dpr;
+}
+
+/**
+ * 배율 적용 방식: transform: scale() 대신 CSS zoom.
+ * scale()은 브라우저(특히 iOS Safari)가 원래 크기로 그린 그림을 늘려 붙여 글자·선이 흐려질 수 있지만,
+ * zoom은 확대된 크기 그대로 다시 그려서 기기 해상도에 맞게 선명하다.
+ */
+function Board({
+  x,
+  y,
+  scale,
+  height,
+  className,
+  children,
+}: {
+  x: number;
+  y: number;
+  scale: number;
+  height?: number;
+  className: string;
+  children: ReactNode;
+}) {
+  const place: CSSProperties = { transform: `translate(${snap(x)}px, ${snap(y)}px)` };
+  const board: CSSProperties = { zoom: scale, ...(height ? { height } : null) };
+  return (
+    <div className="artboard-place" style={place}>
+      <div className={`artboard ${className}`} style={board}>
+        <Ctx.Provider value={scale}>{children}</Ctx.Provider>
+      </div>
+    </div>
+  );
+}
+
 /** 한 화면(375×812)짜리 고정 아트보드 — 홈처럼 스크롤 없는 화면 */
 export function Artboard({ children, className = '' }: { children: ReactNode; className?: string }) {
   const { scale, cut, vw, vh } = useFit();
   const h = ART_H - cut;
-  const style: CSSProperties = {
-    transform: `translate(${(vw - ART_W * scale) / 2}px, ${(vh - h * scale) / 2 - cut * scale}px) scale(${scale})`,
-  };
   return (
     <div className="screen">
-      <div className={`artboard ${className}`} style={style}>
-        <Ctx.Provider value={scale}>{children}</Ctx.Provider>
-      </div>
+      <Board x={(vw - ART_W * scale) / 2} y={(vh - h * scale) / 2 - cut * scale} scale={scale} className={className}>
+        {children}
+      </Board>
     </div>
   );
 }
@@ -108,23 +142,15 @@ export function ScrollArtboard({
   return (
     <div className="screen-scroll">
       <div className="screen-scroll__sizer" style={{ height: h * scale }}>
-        <div
-          className={`artboard artboard--scroll ${className}`}
-          style={{ height, transform: `translate(${left}px, ${-cut * scale}px) scale(${scale})` }}
-        >
-          <Ctx.Provider value={scale}>{children}</Ctx.Provider>
-        </div>
+        <Board x={left} y={-cut * scale} scale={scale} height={height} className={`artboard--scroll ${className}`}>
+          {children}
+        </Board>
       </div>
       {overlay && (
-        <div className="screen-overlay" aria-hidden={false}>
-          <div
-            className="artboard artboard--overlay"
-            style={{
-              transform: `translate(${left}px, ${vh - bottomGap - ART_H * scale}px) scale(${scale})`,
-            }}
-          >
+        <div className="screen-overlay">
+          <Board x={left} y={vh - bottomGap - ART_H * scale} scale={scale} className="artboard--overlay">
             {overlay}
-          </div>
+          </Board>
         </div>
       )}
     </div>

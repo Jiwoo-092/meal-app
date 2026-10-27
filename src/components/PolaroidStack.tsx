@@ -28,6 +28,7 @@ const POSE = {
 const SWIPE_DISTANCE = 50; // px(디자인 기준) 이상 밀면 넘김
 const SWIPE_VELOCITY = 0.35; // px/ms 이상으로 튕기면 넘김
 const TAP_SLOP = 8; // px 이하 움직임은 탭
+const HIT_TOP = -40; // 제스처 영역 시작 위치 (home.css .pstack__hit top 과 맞출 것)
 
 /** 맨 뒤로 들어가는 모션 */
 const TUCK_MS = 720;
@@ -205,12 +206,12 @@ export default function PolaroidStack({ items, onChange }: Props) {
     setDrag({ dx: 0, active: false });
 
     if (!cancelled && !g.moved) {
-      // 탭: 앞 카드 위였을 때만 상세로
-      const front = cardEls.current.get(orderRef.current[0]);
-      const r = front?.getBoundingClientRect();
-      if (r && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom) {
-        navigate(`/polaroids/${orderRef.current[0]}`);
-      }
+      // 탭: 앞 카드(디자인 좌표 x 69~307, y 0~345) 위였을 때만 상세로
+      const r = e.currentTarget.getBoundingClientRect();
+      const k = r.width / 375 || 1;
+      const lx = (e.clientX - r.left) / k;
+      const ly = (e.clientY - r.top) / k + HIT_TOP;
+      if (lx >= 69 && lx <= 307 && ly >= 0 && ly <= 345) navigate(`/polaroids/${orderRef.current[0]}`);
       return;
     }
     if (g.axis !== 'x' || !canSwipe) return;

@@ -11,13 +11,16 @@
   background: var(--white);
 }
 
-.artboard {
+.artboard-place {
   position: absolute;
   left: 0;
   top: 0;
+}
+
+.artboard {
+  position: relative;
   width: 375px;
   height: 812px;
-  transform-origin: 0 0;
   overflow: visible clip; /* 좌우로는 글로우가 번지고, 아래로는 지나간 카드가 잘림 */
   font-family: var(--font-suit);
   color: var(--gray-800);

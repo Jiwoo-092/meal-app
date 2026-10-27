@@ -29,6 +29,7 @@
   overflow: hidden;
 }
 
+.screen-overlay .artboard-place,
 .artboard--overlay,
 .artboard--overlay * {
   pointer-events: none;
@@ -225,10 +226,6 @@
   width: 155px;
 }
 
-.insight-card__ghost {
-  visibility: hidden;
-}
-
 .insight-card__legend-dot {
   position: absolute;
   left: 7px;
@@ -257,20 +254,24 @@
   width: 155px;
 }
 
-/* ---------- 타이틀 수정 ---------- */
-.edit__field {
+/* ---------- 타이틀 수정 ----------
+ * 헤더(top 42 + 56 = 98) — 36px — 텍스트 필드 — 36px — 버튼
+ */
+.edit__form {
   position: absolute;
   left: 26px;
-  top: 207px;
+  top: 134px;
   width: 325px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.edit__field {
   margin: 0;
 }
 
 .edit__buttons {
-  position: absolute;
-  left: 26px;
-  top: 336px;
-  width: 325px;
   display: flex;
   gap: 17px;
 }

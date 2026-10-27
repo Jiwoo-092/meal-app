@@ -108,7 +108,6 @@ function TempoCard({ tempo, t, uid }: { tempo: Tempo; t: number; uid: string }) 
   const fill = phase(t, 150, 1500);
   const sweepEnd = SEG.left[0] + (LEVEL_END[tempo] - SEG.left[0]) * fill;
   const label = TEMPO_LABEL[tempo];
-  const shown = Math.round(label.length * phase(t, 700, 600));
   const sector = (a: readonly [number, number]) => sectorPath(T.cx, T.cy, T.R, T.r, a[0], a[1], T.cr);
   const id = (n: string) => `${uid}-${n}`;
 
@@ -156,10 +155,7 @@ function TempoCard({ tempo, t, uid }: { tempo: Tempo; t: number; uid: string }) 
         </g>
       </svg>
       <p className="insight-card__caption insight-card__caption--tempo">식사 템포</p>
-      <p className="insight-card__value insight-card__value--tempo" aria-label={label}>
-        <span aria-hidden="true">{label.slice(0, shown)}</span>
-        <span className="insight-card__ghost" aria-hidden="true">{label.slice(shown)}</span>
-      </p>
+      <p className="insight-card__value insight-card__value--tempo">{label}</p>
     </div>
   );
 }
