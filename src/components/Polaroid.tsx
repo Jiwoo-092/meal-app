@@ -39,7 +39,7 @@ export default function Polaroid({ polaroid, tone = 'front', className = '', sty
         <img src={design.photo} alt={design.photoAlt} draggable={false} />
       </div>
       {stickers &&
-        design.stickers.map((s, i) => {
+        design.stickers.map((s) => {
           const k = getKeyword(s.keyword);
           if (!k) return null;
           const scale = s.w / 98;
@@ -50,14 +50,14 @@ export default function Polaroid({ polaroid, tone = 'front', className = '', sty
             aspectRatio: `${k.art.w} / ${k.art.h}`,
           };
           if (peel) {
-            // 상세 진입 후 잠깐 쉬었다가 한 장씩 차례로
+            // 상세 진입 후 잠깐 쉬었다가 두 장 동시에
             return (
               <PeelSticker
                 key={s.keyword}
                 src={k.sticker}
                 alt={`${k.label} 키워드 스티커: ${k.name}`}
                 style={pos}
-                delay={260 + i * 420}
+                delay={260}
               />
             );
           }
