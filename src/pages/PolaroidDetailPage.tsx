@@ -31,7 +31,7 @@ export default function PolaroidDetailPage({ id, archive = false }: { id: string
       </Link>
 
       <div className="detail__polaroid">
-        <Polaroid polaroid={polaroid} tone="front" />
+        <Polaroid key={polaroid.id} polaroid={polaroid} tone="front" peel />
       </div>
 
       <div className="detail__insight">

@@ -357,6 +357,49 @@
   pointer-events: none;
 }
 
+/* 스티커 붙이기 모션 (PeelSticker) */
+.psticker {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.psticker__front,
+.psticker__backwrap,
+.psticker__back,
+.psticker__curl {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.psticker__front {
+  display: block;
+}
+
+/* 뒷면: 스티커 모양 그대로의 연회색 종이 + 살짝 뜬 그림자 */
+.psticker__backwrap {
+  filter: drop-shadow(0 1px 1.5px rgba(0, 0, 0, 0.22)) drop-shadow(0 3px 6px rgba(0, 0, 0, 0.08));
+}
+
+.psticker__back {
+  background: linear-gradient(90deg, #d9dade 0%, #e6e7ea 65%, #f1f1f3 100%);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+.psticker__curl {
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  opacity: 0;
+}
+
 /* ---------- 탭바 ---------- */
 .tabbar {
   position: fixed;
