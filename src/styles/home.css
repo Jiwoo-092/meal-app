@@ -336,6 +336,21 @@
   pointer-events: none;
 }
 
+/* '자세히 보기 >' — Figma 'home - 변경 사항 반영' (카드 238×345 기준 x 163.2, y 284, -0.7° 기울기) */
+.pcard__more {
+  position: absolute;
+  left: 68.565%; /* 163.19 / 238 */
+  top: 82.319%; /* 284 / 345 */
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #9b9ca1;
+  white-space: nowrap;
+  transform: rotate(0.707deg);
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
 .pcard__sticker {
   position: absolute;
   height: auto;

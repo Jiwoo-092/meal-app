@@ -263,7 +263,7 @@ export default function PolaroidStack({ items, onChange, detailPath = (id) => `/
             style={style}
             aria-hidden="true"
           >
-            <Polaroid polaroid={p} tone={tuck && !tuck.behind ? 'front' : pose.tone} />
+            <Polaroid polaroid={p} tone={tuck && !tuck.behind ? 'front' : pose.tone} more />
           </div>
         );
       })}

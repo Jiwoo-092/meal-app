@@ -12,6 +12,8 @@ interface Props {
   style?: CSSProperties;
   /** 스티커 표시 여부 (키워드 목록 썸네일 등은 false) */
   stickers?: boolean;
+  /** 사진 아래 '자세히 보기 >' 안내 — 겹쳐진 폴라로이드(홈·날짜별 모음)에서 표시 */
+  more?: boolean;
 }
 
 // M 카드(238×345) 기준 좌표를 %로 변환
@@ -24,7 +26,7 @@ const pctY = (v: number) => `${(v / CH) * 100}%`;
  * 폴라로이드 카드 (사진 + 프레임 + 키워드 스티커)
  * 폭은 부모가 정하고 높이는 238:345 비율을 따른다. 스티커는 카드 크기에 비례해 배치된다.
  */
-export default function Polaroid({ polaroid, tone = 'front', className = '', style, stickers = true }: Props) {
+export default function Polaroid({ polaroid, tone = 'front', className = '', style, stickers = true, more = false }: Props) {
   const design = MEAL_DESIGNS[polaroid.design];
   return (
     <div className={`pcard pcard--${tone} ${className}`} style={style}>
@@ -53,6 +55,11 @@ export default function Polaroid({ polaroid, tone = 'front', className = '', sty
             />
           );
         })}
+        {more && (
+          <span className="pcard__more" aria-hidden="true">
+            자세히 보기 &gt;
+          </span>
+        )}
       </div>
     </div>
   );
