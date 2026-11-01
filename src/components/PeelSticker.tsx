@@ -2,13 +2,15 @@ import { useLayoutEffect, useRef, type CSSProperties } from 'react';
 
 /**
  * 스티커 '착' 붙이기 모션 (레퍼런스 영상 기준)
- * 1) 스티커 뒷면(회색)이 오른쪽에서 살짝 미끄러져 들어오고
- * 2) 오른쪽 끝부터 왼쪽으로 접힌 선이 지나가며 앞면이 붙는다 — 아직 안 붙은 왼쪽은 뒷면, 접힌 선엔 말린 하이라이트·그림자.
- * 뒷면·하이라이트는 스티커 이미지 자체를 마스크로 써서 스티커 모양 그대로 보인다.
+ * 스티커 한 장이 반쯤 접힌 채(뒷면이 위) 놓였다가, 접힌 선이 왼쪽 끝으로 이동하며 펼쳐져 붙는다.
+ * - 이미 붙은 부분: 앞면
+ * - 아직 안 붙은 부분: 접힌 선을 기준으로 뒤집혀(좌우 반전) 붙은 면 위에 얹힌 '뒷면' — 같은 스티커의 뒤쪽이라 모양도 반전
+ * 그래서 회색은 따로 먼저 붙은 게 아니라, 붙고 있는 스티커 자체의 뒷면으로 보인다.
  */
-const DURATION = 640; // ms (스티커 1장)
-const SLIDE_END = 0.3; // 이 비율까지 뒷면이 미끄러져 들어옴, 이후 붙기
-const SLIDE_FROM = 0.45; // 스티커 폭 대비 시작 위치
+const DURATION = 620; // ms (스티커 1장)
+const APPEAR_END = 0.16; // 접힌 스티커가 나타나는 구간
+const SLIDE_FROM = 0.1; // 스티커 폭 대비 시작 위치(오른쪽)
+const FOLD_FROM = 0.6; // 처음 접힌 선 위치(스티커 폭 대비) — 반쯤 접힌 채 놓여서 화면 밖으로 나가지 않게
 
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -30,52 +32,52 @@ export default function PeelSticker({
 }) {
   const wrap = useRef<HTMLSpanElement>(null);
   const front = useRef<HTMLImageElement>(null);
-  const back = useRef<HTMLSpanElement>(null);
-  const curl = useRef<HTMLSpanElement>(null);
+  const flapWrap = useRef<HTMLSpanElement>(null);
+  const flap = useRef<HTMLSpanElement>(null);
 
   useLayoutEffect(() => {
     const w = wrap.current;
     const f = front.current;
-    const b = back.current;
-    const c = curl.current;
-    if (!w || !f || !b || !c) return;
+    const fw = flapWrap.current;
+    const fl = flap.current;
+    if (!w || !f || !fw || !fl) return;
 
     const done = () => {
       w.style.transform = '';
       w.style.opacity = '';
       f.style.clipPath = '';
       f.style.webkitClipPath = '';
-      b.style.display = 'none';
-      c.style.display = 'none';
+      fw.style.display = 'none';
     };
     if (reduceMotion()) {
       done();
       return;
     }
 
-    // fold: 접힌 선 위치(0 = 왼쪽 끝, 1 = 오른쪽 끝). 1 → 0으로 이동하며 앞면이 드러남
     const paint = (p: number) => {
-      const slide = Math.min(p / SLIDE_END, 1);
-      const peel = p <= SLIDE_END ? 0 : easeInOut((p - SLIDE_END) / (1 - SLIDE_END));
-      const fold = 1 - peel;
-      const width = w.offsetWidth || 1;
-      const px = fold * width;
+      const W = w.offsetWidth || 1;
+      const appear = Math.min(p / APPEAR_END, 1);
+      const unfold = p <= APPEAR_END ? 0 : easeInOut((p - APPEAR_END) / (1 - APPEAR_END));
+      // 접힌 선 위치(px, 스티커 왼쪽 기준): W → 0
+      const fold = W * FOLD_FROM * (1 - unfold);
 
-      w.style.opacity = String(Math.min(slide * 2.2, 1));
-      w.style.transform = `translateX(${(1 - easeOut(slide)) * SLIDE_FROM * 100}%)`;
+      w.style.opacity = String(Math.min(appear * 1.6, 1));
+      w.style.transform = `translateX(${(1 - easeOut(appear)) * SLIDE_FROM * 100}%)`;
 
-      const rightHidden = `${(1 - fold) * 100}%`;
-      const leftHidden = `${fold * 100}%`;
-      f.style.clipPath = f.style.webkitClipPath = `inset(-20% -20% -20% ${leftHidden})`;
-      b.style.clipPath = b.style.webkitClipPath = `inset(-12% ${rightHidden} -12% -12%)`;
-      // 접힌 선: 바로 왼쪽은 말려 올라간 밝은 면, 오른쪽엔 붙은 면 위로 얇은 그림자
-      c.style.background = `linear-gradient(90deg,
-        rgba(255,255,255,0) ${px - 14}px,
-        rgba(255,255,255,0.95) ${px - 5}px,
-        rgba(214,214,218,1) ${px - 1}px,
-        rgba(0,0,0,0.16) ${px}px,
-        rgba(0,0,0,0) ${px + 7}px)`;
-      c.style.opacity = fold > 0.002 && fold < 0.998 ? '1' : '0';
+      // 붙은 앞면: 접힌 선 오른쪽
+      f.style.clipPath = f.style.webkitClipPath = `inset(-20% -20% -20% ${fold}px)`;
+
+      // 안 붙은 부분 [0, fold]를 접힌 선 기준으로 좌우 반전 → [fold, 2·fold]에 뒷면으로 얹힘
+      fl.style.clipPath = fl.style.webkitClipPath = `inset(0 ${W - fold}px 0 0)`;
+      fl.style.transformOrigin = `${fold}px 50%`;
+      // 뒷면 음영: 접힌 선(말린 곳)은 밝게, 끝으로 갈수록 살짝 어둡게
+      fl.style.background = `linear-gradient(90deg,
+        #d3d4d8 0px,
+        #e2e3e6 ${fold * 0.55}px,
+        #f1f1f3 ${Math.max(fold - 9, 0)}px,
+        #ffffff ${Math.max(fold - 3, 0)}px,
+        #dcdde1 ${fold}px)`;
+      fw.style.opacity = fold > 0.5 ? '1' : '0';
     };
 
     paint(0);
@@ -100,10 +102,9 @@ export default function PeelSticker({
   return (
     <span ref={wrap} className="psticker" style={{ ...style, opacity: 0 }}>
       <img ref={front} className="psticker__front" src={src} alt={alt} draggable={false} />
-      <span ref={back} className="psticker__backwrap" aria-hidden="true">
-        <span className="psticker__back" style={mask} />
+      <span ref={flapWrap} className="psticker__flapwrap" aria-hidden="true">
+        <span ref={flap} className="psticker__flap" style={mask} />
       </span>
-      <span ref={curl} className="psticker__curl" style={mask} aria-hidden="true" />
     </span>
   );
 }
