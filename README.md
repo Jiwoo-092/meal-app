@@ -1,55 +1,6 @@
-# Mealo (밀로) 웹 프로토타입
+# meal-app
 
-전시용 모바일 우선 웹 프로토타입. 모든 데이터는 더미입니다 (`src/data/mock.ts`).
-디자인 기준: Figma `Mealo-APP` › ❤️‍🔥 UI 디자인 › **gui 클로드가 구현할 페이지 인터렉션**
+새 웹사이트를 위한 빈 저장소입니다.
 
-## 실행
-
-```bash
-npm install
-npm run dev        # 로컬 개발
-npm run build      # 프로덕션 빌드 (dist/)
-```
-
-## 구조
-
-```
-public/assets/
-├─ food/meal-1~3.webp      음식 사진 (asset/food img 에서 변환)
-├─ sticker/*.webp          키워드 스티커 5종 (asset/sticker SVG를 3배 해상도로 변환)
-└─ logo.svg
-src/
-├─ App.tsx                 라우팅 (명세 §5 경로)
-├─ lib/router.tsx          History API 라우터
-├─ styles/tokens.css       Figma 변수 (컬러·폰트)
-├─ styles/home.css         홈 · 폴라로이드 카드 · 탭바
-├─ data/mock.ts            더미 끼니, 키워드, 카드 위 스티커 배치
-├─ components/
-│  ├─ Polaroid.tsx         폴라로이드 카드 (사진+프레임+스티커)
-│  ├─ PolaroidStack.tsx    홈 카드 스택 + 왼쪽 스와이프 인터랙션
-│  └─ TabBar.tsx           하단 플로팅 탭바
-└─ pages/                  IA 화면별 페이지
-```
-
-## 홈 인터랙션
-
-- 앞 카드를 **좌우로 스와이프** → 그 방향으로 호를 그리며 빠져나가 스택 맨 뒤로 들어가고, 뒤 카드가 앞으로 나옴. 무한 순환.
-- 앞 카드 **탭** → 상세페이지 (`/polaroids/:id`)
-- 키보드: ← / → 다음 카드, Enter 상세
-- 배경 글로우는 주황 단색, 9초 주기로 은은하게 움직임 (`prefers-reduced-motion` 시 정지)
-
-## 상세 · 타이틀 수정
-
-- `/polaroids/:id` — Figma 'polaroid detail' (375×1111). 홈과 같은 배율, 탭바는 화면 하단 고정.
-  아래로 스크롤해 인사이트가 보이면 식사 템포 게이지가 차오르고 식사 시간 숫자가 0부터 올라간다.
-  게이지는 Figma tempo/time 컴포넌트의 호 데이터(중심·반지름·각도·모서리)를 SVG로 옮긴 것 (`MealInsight.tsx`).
-- `/polaroids/:id/title` — 연필 버튼으로 진입. 헤더·버튼은 Figma 'editpage', 텍스트 필드는 기존 구현.
-
-## 아직 임시인 것
-
-| 항목 | 상태 |
-|---|---|
-| 탭바·설정·뒤로가기 아이콘 | 임시 라인 아이콘 → Figma 아이콘 SVG 받으면 교체 |
-| 헤더 영문 폰트 (BC Alphapipe) | 공개 웹폰트가 없어 Poppins로 대체 중 |
-| 상세·캘린더·폴더·키워드·전등 화면 | 다음 단계에서 Figma 기준으로 리빌드 |
-| 저장 방식 | 메모리 상태, 새로고침 시 더미로 초기화 |
+이전에 있던 Mealo 앱 프로토타입은 [Jiwoo-092/mealo-app-prototype](https://github.com/Jiwoo-092/mealo-app-prototype)으로 옮겼습니다.
+(이 저장소의 이전 커밋 기록에도 그대로 남아 있습니다.)
